@@ -10,36 +10,28 @@ var buffer = _interopRequireWildcard(require("buffer"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != _typeof(e) && "function" != typeof e) return { "default": e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n["default"] = e, t && t.set(e, n), n; }
 window.Buffer = buffer.Buffer;
-
-// callback: The function to call after the transaction is signed.
-// This closes our paywall.
-// milliLamports: The price to charge the user in "milli-lamports" (.001 SOL),
-// approximately 10 cents (for now)
-// reciever: The public key of the wallet to send payment to.
-// Should be passed as an environment variable wherever your site's deployed.
-
-var payWithSol = exports.payWithSol = function payWithSol(callback, milliLamports, reciever, rpcProvider) {
+var payWithSol = exports.payWithSol = function payWithSol(callback, milliLamports, reciever, rpcProvider, errorCallback) {
   window.solana.connect().then(function (userKey) {
     // Connect to cluster
     var connection = function connection() {
       if (rpcProvider) {
-        return new web3.Connection(rpcProvider, 'confirmed');
+        return new web3.Connection(rpcProvider, "confirmed");
       } else {
-        return new web3.Connection(web3.clusterApiUrl('mainnet-beta'), 'confirmed');
+        return new web3.Connection(web3.clusterApiUrl("mainnet-beta"), "confirmed");
       }
     };
     var web3userKey = new web3.PublicKey(userKey.publicKey);
     var web3reciever = new web3.PublicKey(reciever);
 
     // Add transfer instruction to transaction
-    connection().getLatestBlockhash('finalized').then(function (blockhashObj) {
+    connection().getLatestBlockhash("finalized").then(function (blockhashObj) {
       var transaction = new web3.Transaction({
         recentBlockhash: blockhashObj.blockhash,
         feePayer: web3userKey
       }).add(web3.SystemProgram.transfer({
         fromPubkey: web3userKey,
         toPubkey: web3reciever,
-        lamports: web3.LAMPORTS_PER_SOL * .001 * milliLamports
+        lamports: web3.LAMPORTS_PER_SOL * 0.001 * milliLamports
       }));
 
       // Sign transaction, broadcast, and confirm
@@ -47,7 +39,7 @@ var payWithSol = exports.payWithSol = function payWithSol(callback, milliLamport
         callback();
       });
     }, function (e) {
-      console.error(e);
+      errorCallback(e);
     });
   });
 };
