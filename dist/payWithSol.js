@@ -4,7 +4,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.payWithSol = void 0;
+exports.payWithSolSplit = exports.payWithSol = void 0;
 var web3 = _interopRequireWildcard(require("@solana/web3.js"));
 var buffer = _interopRequireWildcard(require("buffer"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(e) { return e ? t : r; })(e); }
@@ -35,6 +35,39 @@ var payWithSol = exports.payWithSol = function payWithSol(callback, milliLamport
       }));
 
       // Sign transaction, broadcast, and confirm
+      window.solana.signAndSendTransaction(transaction).then(function (res) {
+        callback();
+      });
+    }, function (e) {
+      errorCallback(e);
+    });
+  });
+};
+var payWithSolSplit = exports.payWithSolSplit = function payWithSolSplit(callback, milliLamportsA, recieverA, milliLamportsB, recieverB, rpcProvider, errorCallback) {
+  window.solana.connect().then(function (userKey) {
+    var connection = function connection() {
+      if (rpcProvider) {
+        return new web3.Connection(rpcProvider, "confirmed");
+      } else {
+        return new web3.Connection(web3.clusterApiUrl("mainnet-beta"), "confirmed");
+      }
+    };
+    var web3userKey = new web3.PublicKey(userKey.publicKey);
+    var web3recieverA = new web3.PublicKey(recieverA);
+    var web3recieverB = new web3.PublicKey(recieverB);
+    connection().getLatestBlockhash("finalized").then(function (blockhashObj) {
+      var transaction = new web3.Transaction({
+        recentBlockhash: blockhashObj.blockhash,
+        feePayer: web3userKey
+      }).add(web3.SystemProgram.transfer({
+        fromPubkey: web3userKey,
+        toPubkey: web3recieverA,
+        lamports: web3.LAMPORTS_PER_SOL * 0.001 * milliLamportsA
+      })).add(web3.SystemProgram.transfer({
+        fromPubkey: web3userKey,
+        toPubkey: web3recieverB,
+        lamports: web3.LAMPORTS_PER_SOL * 0.001 * milliLamportsB
+      }));
       window.solana.signAndSendTransaction(transaction).then(function (res) {
         callback();
       });

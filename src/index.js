@@ -1,3 +1,3 @@
-import { payWithSol } from "./payWithSol.js";
+import { payWithSol, payWithSolSplit } from "./payWithSol.js";
 
-export { payWithSol };
+export { payWithSol, payWithSolSplit };

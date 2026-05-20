@@ -9,4 +9,10 @@ Object.defineProperty(exports, "payWithSol", {
     return _payWithSol.payWithSol;
   }
 });
+Object.defineProperty(exports, "payWithSolSplit", {
+  enumerable: true,
+  get: function get() {
+    return _payWithSol.payWithSolSplit;
+  }
+});
 var _payWithSol = require("./payWithSol.js");
